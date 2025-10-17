@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bid History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <header class="bg-blue-800 text-white py-4 flex justify-between items-center px-4 shadow-md">
+        <a href="index.html" class="text-white font-medium hover:underline">← Back</a>
+        <h1 class="text-xl font-semibold">Bid History</h1>
+    </header>
+
+    <main class="flex justify-center p-6">
+        <div class="overflow-x-auto w-full max-w-3xl">
+            <table class="min-w-full bg-white shadow-lg rounded-xl overflow-hidden">
+                <thead class="bg-blue-700 text-white">
+                    <tr>
+                        <th class="py-3 px-4 text-left">User</th>
+                        <th class="py-3 px-4 text-left">Bid Amount</th>
+                        <th class="py-3 px-4 text-left">Time</th>
+                    </tr>
+                </thead>
+                <tbody id="bid-history-body" class="divide-y divide-gray-200">
+                    <!-- Riwayat bidding akan dimuat dari JS -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
