@@ -13,18 +13,60 @@ export default function Navbar() {
       setUser(user)
       
       if (user) {
-        const { data } = await supabase
+        // Check if profile exists, create if not
+        const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single()
-        setIsAdmin(data?.role === 'admin')
+        
+        if (!profile) {
+          // Create missing profile
+          const { count } = await supabase
+            .from('profiles')
+            .select('id', { count: 'exact' })
+          
+          const isFirstUser = count === 0
+          
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            phone: user.user_metadata?.phone || '',
+            role: isFirstUser ? 'admin' : 'user'
+          })
+          
+          setIsAdmin(isFirstUser)
+        } else {
+          setIsAdmin(profile.role === 'admin')
+        }
       }
     }
     getUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null)
+      
+      // Create profile on sign in if missing
+      if (event === 'SIGNED_IN' && session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (!profile) {
+          const { count } = await supabase
+            .from('profiles')
+            .select('id', { count: 'exact' })
+          
+          await supabase.from('profiles').upsert({
+            id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            phone: session.user.user_metadata?.phone || '',
+            role: count === 0 ? 'admin' : 'user'
+          })
+        }
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -37,29 +79,62 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="navbar">
+    <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#FFFDD0', borderBottom: '2px solid #8B0000' }}>
       <div className="container">
-        <div className="navbar-content">
-          <Link href="/" className="navbar-brand">
-            Used Car Sales
-          </Link>
-          <div className="navbar-nav">
-            <Link href="/">Home</Link>
+        <Link href="/" className="navbar-brand d-flex align-items-center" style={{ color: '#8B0000', fontWeight: '800', fontSize: '24px', textDecoration: 'none' }}>
+          <i className="bi bi-car-front me-2" style={{ fontSize: '28px' }}></i>
+          Jual Mobil Bekas Indonesia
+        </Link>
+        
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <Link href="/homepage" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Home</Link>
+            </li>
             {user ? (
               <>
-                <Link href="/favorites">Favorites</Link>
-                {isAdmin && <Link href="/admin">Admin</Link>}
-                <button onClick={handleLogout} className="btn btn-secondary">
-                  Logout
-                </button>
+                {!isAdmin && (
+                  <>
+                    <li className="nav-item">
+                      <Link href="/" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Beranda</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="/favorites" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Favorit</Link>
+                    </li>
+                  </>
+                )}
+                <li className="nav-item">
+                  <Link href="/profile" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Profil</Link>
+                </li>
+                {isAdmin && (
+                  <li className="nav-item">
+                    <Link href="/admin" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Admin</Link>
+                  </li>
+                )}
+                <li className="nav-item">
+                  <button onClick={handleLogout} className="btn btn-secondary ms-2">
+                    Keluar
+                  </button>
+                </li>
               </>
             ) : (
               <>
-                <Link href="/auth/login">Login</Link>
-                <Link href="/auth/register">Register</Link>
+                <li className="nav-item">
+                  <Link href="/" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Lihat Mobil</Link>
+                </li>
+                <li className="nav-item">
+                  <Link href="/auth/login" className="nav-link" style={{ color: '#8B0000', fontWeight: '600' }}>Masuk</Link>
+                </li>
+                <li className="nav-item">
+                  <Link href="/auth/register" className="btn btn-primary ms-2" style={{ textDecoration: 'none', color: 'white' }}>Daftar</Link>
+                </li>
               </>
             )}
-          </div>
+          </ul>
         </div>
       </div>
     </nav>

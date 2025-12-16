@@ -47,11 +47,16 @@ export default function Favorites() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '30px' }}>My Favorites</h1>
+      <button onClick={() => window.history.back()} className="btn btn-back">
+        ← Kembali
+      </button>
+      
+      <h1 className="page-title">Mobil Favorit Saya</h1>
       
       {favorites.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '50px' }}>
-          <p>You haven't added any cars to your favorites yet.</p>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>💔</div>
+          <p style={{ fontSize: '18px', color: '#666' }}>Anda belum menambahkan mobil ke daftar favorit.</p>
         </div>
       ) : (
         <div className="grid grid-3">

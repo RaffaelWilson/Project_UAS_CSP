@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, getImageUrl } from '../lib/supabase'
 import { Heart } from 'lucide-react'
 
 export default function CarCard({ car }) {
@@ -50,26 +50,27 @@ export default function CarCard({ car }) {
   }
 
   return (
-    <div className="card">
-      <div style={{ position: 'relative' }}>
+    <div className="card car-card">
+      <div style={{ position: 'relative', marginBottom: '16px' }}>
         <img
-          src={car.image_url || '/placeholder-car.jpg'}
+          src={getImageUrl((car.images && car.images[0]) || car.image_url)}
           alt={`${car.brand} ${car.model}`}
-          style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '4px' }}
+          className="car-image"
         />
         {user && (
           <button
             onClick={toggleFavorite}
             style={{
               position: 'absolute',
-              top: '10px',
-              right: '10px',
-              background: 'white',
+              top: '12px',
+              right: '12px',
+              background: 'rgba(255, 255, 255, 0.9)',
               border: 'none',
               borderRadius: '50%',
-              padding: '8px',
+              padding: '10px',
               cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              transition: 'all 0.3s ease'
             }}
           >
             <Heart
@@ -81,18 +82,27 @@ export default function CarCard({ car }) {
         )}
       </div>
       
-      <h3 style={{ margin: '15px 0 10px 0' }}>
+      <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
         {car.brand} {car.model} ({car.year})
       </h3>
       
-      <div style={{ marginBottom: '15px', color: '#666' }}>
-        <p>Price: Rp {car.price?.toLocaleString()}</p>
-        <p>KM: {car.km?.toLocaleString()}</p>
-        <p>City: {car.city}</p>
+      <div className="price-tag" style={{ marginBottom: '16px' }}>
+        Rp {car.price?.toLocaleString()}
       </div>
       
-      <Link href={`/cars/${car.id}`} className="btn btn-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
-        View Details
+      <div style={{ marginBottom: '20px', fontSize: '14px', color: '#666', lineHeight: '1.6' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <span><i className="bi bi-geo-alt me-1"></i>{car.city}</span>
+          <span><i className="bi bi-speedometer2 me-1"></i>{car.km?.toLocaleString()} km</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span><i className="bi bi-gear me-1"></i>{car.transmission}</span>
+          <span><i className="bi bi-fuel-pump me-1"></i>{car.fuel_type}</span>
+        </div>
+      </div>
+      
+      <Link href={`/cars/${car.id}`} className="btn btn-primary" style={{ width: '100%', textDecoration: 'none' }}>
+        <i className="bi bi-eye me-2"></i>Lihat Detail
       </Link>
     </div>
   )
